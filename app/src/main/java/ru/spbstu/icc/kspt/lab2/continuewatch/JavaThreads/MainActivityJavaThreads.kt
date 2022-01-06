@@ -1,18 +1,15 @@
-package ru.spbstu.icc.kspt.lab2.continuewatch
+package ru.spbstu.icc.kspt.lab2.continuewatch.JavaThreads
 
 import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import java.lang.Exception
-import java.util.concurrent.*
-import kotlin.random.Random
+import ru.spbstu.icc.kspt.lab2.continuewatch.R
 
-class MainActivityExecutionService : AppCompatActivity() {
-    private var secondsElapsed: Int = 0
+class MainActivityJavaThreads : AppCompatActivity() {
+    var secondsElapsed: Int = 0
     lateinit var textSecondsElapsed: TextView
-    private lateinit var executorService: ExecutorService
-    private lateinit var future: Future<*>
+    private lateinit var backgroundThread: Thread
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,12 +29,12 @@ class MainActivityExecutionService : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        executorService = Executors.newSingleThreadExecutor()
-        future = executorService.submit {
-                Thread.currentThread().name = "Counting Thread"
+
+        backgroundThread = Thread {
+            try {
                 var start = System.currentTimeMillis()
                 var delta: Long = 0;
-                while (!future.isCancelled) {
+                while (!Thread.currentThread().isInterrupted) {
                     textSecondsElapsed.post {
                         textSecondsElapsed.text =
                             getString(R.string.seconds_elapsed, secondsElapsed++)
@@ -45,16 +42,21 @@ class MainActivityExecutionService : AppCompatActivity() {
                     Thread.sleep(1000 + delta)
                     delta = start + 1000 - System.currentTimeMillis()
                     start += 1000
-                    Log.d(
-                        "Counting",
-                        "Seconds counted:${secondsElapsed} Err sum, ms:${System.currentTimeMillis() - start}"
-                    )
                 }
+                Thread.currentThread().interrupt()
+            } catch (e: InterruptedException) {
+                Thread.currentThread().interrupt()
+            }
         }
+        backgroundThread.start()
+
     }
 
     override fun onStop() {
         super.onStop()
-        future.cancel(true)
+        Log.d("Counting Thread", "Thread interrupted")
+        backgroundThread.interrupt()
+
     }
+
 }
