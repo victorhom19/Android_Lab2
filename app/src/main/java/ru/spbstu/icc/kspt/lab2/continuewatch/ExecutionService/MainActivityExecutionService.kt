@@ -1,9 +1,9 @@
 package ru.spbstu.icc.kspt.lab2.continuewatch.ExecutionService
 
 import android.os.Bundle
-import android.util.Log
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import ru.spbstu.icc.kspt.lab2.continuewatch.App
 import ru.spbstu.icc.kspt.lab2.continuewatch.R
 import java.util.concurrent.*
 
@@ -30,7 +30,7 @@ class MainActivityExecutionService : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        future = ExecutorInstance().executor.submit {
+        future = (application as App).executor.submit {
                 var start = System.currentTimeMillis()
                 var delta: Long = 0;
                 while (!future.isCancelled) {
